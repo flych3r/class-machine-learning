@@ -29,4 +29,4 @@ Execute as seguintes tarefas de implementação e comente o que se pede
     * a. Reporte MSE e R2 score para o conjunto de treino e o de teste
     * b. Reporte os coeficientes
     * c. Apenas para o método d e e, plote o MSE para cada época em um gráfico linha. Comente qual dos métodos converge mais rápido.
-    * d. Apenas para o método h, plote o MSE para o conjunto de treino e o conjunto de teste (duas linhas) variando . Comente qual seria o valor de  mais adequado
+    * d. Apenas para o método h, plote o MSE para o conjunto de treino e o conjunto de teste (duas linhas) variando *lambda* = [1, 2, 3, 4, 5]. Comente qual seria o valor de *lambda* mais adequado
