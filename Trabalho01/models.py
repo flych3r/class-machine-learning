@@ -79,77 +79,33 @@ class LinearRegression:
         for b in range(0, N, batch_size):
             X_batch = X[b:b + batch_size]
             y_batch = y[b:b + batch_size]
+            bs = len(X_batch)
+            bs_div = max(1, batch_size % N)
+
             y_hat = (np.dot(X_batch, self.W) + self.b).reshape(-1, 1)
 
-            dW = -2/batch_size * np.sum(X_batch * (y_batch - y_hat), axis=0)
-            dW -= l2_penalty(self.regularization_penalty, self.W)
-            db = -2/batch_size * np.sum(y_batch - y_hat)
-            db -= l2_penalty(self.regularization_penalty, self.b)
+            w_penalty = l2_penalty(self.regularization_penalty, self.W) / bs_div
+            dW = -2/batch_size * (np.sum(X_batch * (y_batch - y_hat), axis=0) + w_penalty)
+            b_penalty = l2_penalty(self.regularization_penalty, self.b) / bs_div
+            db = -2/batch_size * (np.sum(y_batch - y_hat) + b_penalty)
 
             self.W -= (dW * learning_rate) / max(1, batch_size % N)
             self.b -= (db * learning_rate) / max(1, batch_size % N)
 
     def _gradient_descent_runner(
         self, X, y, learning_rate=0.1, batch_size=None, epochs=10,
-        tool=None, verbose=False, val_set=None, return_metrics=False
+        tool=None, verbose=False, return_metrics=False
     ):
         metrics = []
         old_error = self._compute_error(X, y)
 
-        epochs = range(epochs)
-        if verbose == 1:
-            epochs = trange(len(epochs), desc='epoch 0', leave=True)
-        elif verbose == 2:
-            legend = ['train loss', 'train eval']
-            if val_set:
-                legend += ['val loss', 'val eval']
-            animator = Animator(
-                xlabel='epoch', xlim=[1, len(epochs)], ylim=[0, np.max(y) * 2],
-                legend=legend, title='Training loss and eval'
-            )
-
-        for epoch in epochs:
+        for epoch in range(epochs):
             self._step_gradient(X, y, learning_rate, batch_size)
             error = self._compute_error(X, y)
             if tool and abs(old_error - error) < tool:
                 break
             old_error = error
-            train_metrics = [error]
-            val_metrics = []
-            if verbose:
-                if self.eval_metric is not None:
-                    train_metrics.append(self.evaluate(X, y))
-                if val_set:
-                    val_metrics = [self._compute_error(val_set[0], val_set[1])]
-                    if self.eval_metric is not None:
-                        val_metrics.append(self.evaluate(val_set[0], val_set[1]))
-                if verbose == 1:
-                    msg = 'epoch {} => {} {}'
-                    train_log = 'train({} {})'.format(
-                        'loss: {:.5f}'.format(train_metrics[0]),
-                        'eval: {:.5f}'.format(train_metrics[1])
-                        if len(train_metrics) > 1 else ''
-                    )
-                    val_log = ''
-                    if val_set:
-                        val_log = 'val({} {})'.format(
-                            'loss: {:.5f}'.format(val_metrics[0]),
-                            'eval: {:.5f}'.format(val_metrics[1])
-                            if len(val_metrics) > 1 else ''
-                        )
-                    epochs.set_description(
-                        msg.format(
-                            epoch + 1,
-                            train_log,
-                            val_log
-                        )
-                    )
-                    time.sleep(.01)
-                    epochs.refresh()
-                elif verbose == 2:
-                    animator.add(epoch + 1, train_metrics + val_metrics)
-            metrics.append((train_metrics, val_metrics))
-
+            metrics.append(error)
         if return_metrics:
             return metrics
 
