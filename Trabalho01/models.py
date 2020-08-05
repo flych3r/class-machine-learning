@@ -10,7 +10,7 @@ class LinearRegression:
         self.W = None
         self.b = None
         self.method = method
-        self.regularization_penalty = 0
+        self.regularization_penalty = regularization_penalty
         self.eval_metric = eval_metric
 
     def fit(self, X, y, **kwargs):
@@ -85,12 +85,12 @@ class LinearRegression:
             y_hat = (np.dot(X_batch, self.W) + self.b).reshape(-1, 1)
 
             w_penalty = l2_penalty(self.regularization_penalty, self.W) / bs_div
-            dW = -2/batch_size * (np.sum(X_batch * (y_batch - y_hat), axis=0) + w_penalty)
+            dW = -2/bs * (np.sum(X_batch * (y_batch - y_hat), axis=0) + w_penalty)
             b_penalty = l2_penalty(self.regularization_penalty, self.b) / bs_div
-            db = -2/batch_size * (np.sum(y_batch - y_hat) + b_penalty)
+            db = -2/bs * (np.sum(y_batch - y_hat) + b_penalty)
 
-            self.W -= (dW * learning_rate) / max(1, batch_size % N)
-            self.b -= (db * learning_rate) / max(1, batch_size % N)
+            self.W -= (dW * learning_rate) / bs_div
+            self.b -= (db * learning_rate) / bs_div
 
     def _gradient_descent_runner(
         self, X, y, learning_rate=0.1, batch_size=None, epochs=10,
@@ -99,7 +99,9 @@ class LinearRegression:
         metrics = []
         old_error = self._compute_error(X, y)
 
-        for epoch in range(epochs):
+        for _ in range(epochs):
+            shuffle = np.random.permutation(len(X))
+            X, y = X[shuffle], y[shuffle]
             self._step_gradient(X, y, learning_rate, batch_size)
             error = self._compute_error(X, y)
             if tool and abs(old_error - error) < tool:
