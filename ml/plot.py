@@ -1,6 +1,13 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from IPython import display
+from metrics import confusion_matrix
+
+
+def config_plot():
+    display.set_matplotlib_formats('jpg', quality=94)
+    plt.style.use('fivethirtyeight')
+    plt.rcParams['figure.dpi'] = 100
 
 
 def plot_regression_line(X, y, lr):
@@ -38,6 +45,50 @@ def plot_lines(lines, labels=None, title=None, xlabel=None, ylabel=None):
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
     plt.plot()
+
+
+def plot_confusion_matrix(X, y, clf):
+    y_pred = clf.predict(X)
+    conf = confusion_matrix(y, y_pred)
+
+    lim = np.max(conf) / 2
+
+    fig, ax = plt.subplots()
+
+    im = ax.matshow(conf, cmap='Reds')
+    fig.colorbar(im)
+    for (i, j), z in np.ndenumerate(conf):
+        ax.text(j, i, z, ha='center', va='center', color='white' if z > lim else 'black')
+
+    plt.grid(False)
+
+
+def plot_boundaries(X, y, clf):
+    # Plot the decision boundary. For that, we will assign a color to each
+    # point in the mesh [x_min, x_max]x[y_min, y_max].
+    x_min, x_max = X[:, 0].min() - .5, X[:, 0].max() + .5
+    y_min, y_max = X[:, 1].min() - .5, X[:, 1].max() + .5
+    h = .02  # step size in the mesh
+    xx, yy = np.meshgrid(np.arange(x_min, x_max, h), np.arange(y_min, y_max, h))
+    try:
+        Z = clf.predict(np.c_[xx.ravel(), yy.ravel()])
+    except:
+        raise ValueError('To plot the boundaries, the classifier must be fitted using only 2 features')
+
+    # Put the result into a color plot
+    Z = Z.reshape(xx.shape)
+    plt.pcolormesh(xx, yy, Z, cmap=plt.cm.Paired)
+
+    # Plot also the training points
+    for c in np.unique(y):
+        mask = (y == c).flatten()
+        plt.scatter(X[mask, 0], X[mask, 1], label=c, edgecolors='k', cmap=plt.cm.Paired)
+    plt.legend()
+    plt.xlim(xx.min(), xx.max())
+    plt.ylim(yy.min(), yy.max())
+    plt.xticks(())
+    plt.yticks(())
+    plt.grid(False)
 
 
 class Animator:
