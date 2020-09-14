@@ -1,13 +1,14 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from IPython import display
-from metrics import confusion_matrix
+from ml.core.metrics import confusion_matrix
 
 
 def config_plot():
     display.set_matplotlib_formats('jpg', quality=94)
     plt.style.use('fivethirtyeight')
-    plt.rcParams['figure.dpi'] = 100
+    plt.rcParams['figure.dpi'] = 120
+    plt.rcParams['figure.figsize'] = 12, 8
 
 
 def plot_regression_line(X, y, lr):

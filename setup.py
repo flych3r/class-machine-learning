@@ -1,10 +1,10 @@
-
 from setuptools import find_packages, setup
 
 requirements = [
     'matplotlib',
     'numpy',
-    'pandas'
+    'pandas',
+    'tqdm'
 ]
 
 version = 0.1
@@ -19,15 +19,10 @@ setup(
     packages=[
         'ml',
         'ml.core',
-        'ml.data',
-        'ml.losses',
-        'ml.models',
-        'ml.plot'
-        'ml.regularization',
     ],
+    # packages=find_packages(),
     description='ML algorithms',
     license='MIT-0',
-    packages=find_packages(),
     zip_safe=True,
     install_requires=requirements,
 )

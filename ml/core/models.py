@@ -1,8 +1,8 @@
 import numpy as np
-from plot import Animator, plot_regression_line
 from tqdm import trange
-from losses import rss
-from regularization import l2_penalty
+from ml.core.plot import Animator, plot_regression_line
+from ml.core.losses import rss
+from ml.core.regularization import l2_penalty
 
 class LinearRegression:
     def __init__(self, method='analytic', regularization_penalty=0, eval_metric=None):
