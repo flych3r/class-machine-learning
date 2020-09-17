@@ -13,3 +13,7 @@ def covariance_matrix(X):
     cov_mat = (X @ X.T) * (1 / n)
     return cov_mat
 
+def mode(a):
+        (_, idx, counts) = np.unique(a, return_index=True, return_counts=True)
+        index = idx[np.argmax(counts)]
+        return a[index]

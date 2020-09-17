@@ -2,7 +2,9 @@ import numpy as np
 from tqdm import trange
 from ml.core.plot import Animator, plot_regression_line
 from ml.core.losses import rss
+from ml.core.metrics import mse, accuracy, euclidean_distance
 from ml.core.regularization import l2_penalty
+from ml.core.math import mode
 
 class LinearRegression:
     def __init__(self, method='analytic', regularization_penalty=0, eval_metric=None):
@@ -302,3 +304,76 @@ class GaussianQuadraticDiscriminant:
         max_prob = np.argmax(probs, axis=1)
         map_classes = np.vectorize(lambda x: self.classes[x])
         return map_classes(max_prob)
+
+class MLP:
+    def __init__(self, inp, units, reset=False):
+        self.inp = inp
+        self.units = units
+        self.reset = reset
+
+        self.H = np.random.randn(self.inp, self.units)
+        self.O = np.random.randn(self.units, 1)
+
+    def _sigmoid(self, y):
+        return 1 / (1 + np.exp(-y))
+
+    def _sigmoid_line(self, y):
+        return self._sigmoid(y) * (1 - self._sigmoid(y))
+
+    def _get_classess(y_pred):
+        return np.greater(y_pred, 0.5).astype(int).flatten()
+
+    def fit(self, X, y, learning_rate=1e-2, epochs=10, return_losses=False, verbose=None):
+        if self.reset:
+            self.H = np.random.randn(self.inp, self.units)
+            self.O = np.random.randn(self.units, 1)
+        y = y.reshape(-1, 1)
+        losses = []
+        for e in range(epochs):
+            h = X @ self.H
+            h_A = self._sigmoid(h)
+            o = h_A @ self.O
+            o_A = self._sigmoid(o)
+
+            grad_o_A = - (np.divide(y, o_A) - np.divide(1 - y, 1 - o_A))
+            grad_o = grad_o_A * self._sigmoid_line(o)
+            grad_O = h_A.T @ grad_o
+
+            grad_h_A = grad_o_A @ self.O.T
+            grad_h = grad_h_A * self._sigmoid_line(h)
+            grad_H = X.T @ grad_h
+
+            self.H -= grad_H * learning_rate
+            self.O -= grad_O * learning_rate
+
+            loss = mse(o_A, y)
+            losses.append(loss)
+            if verbose and e % verbose == 0:
+                acc = accuracy(y, self._get_classess(o_A))
+                print('Epoch {}: {} loss / {} accuracy'.format(e, loss, acc))
+        if return_losses:
+            return losses
+
+    def predict(self, X):
+        h = X @ self.H
+        h_A = self._sigmoid(h)
+        o = h_A @ self.O
+        o_A = self._sigmoid(o)
+        return np.greater(o_A, 0.5).astype(int).flatten()
+
+class KNN:
+    def __init__(self, k):
+        self.k = k
+
+    def fit(self, X, y):
+        self.features = X
+        self.classes = y
+
+    def predict(self, X):
+        y_pred = np.zeros(X.shape[0])
+        for i, r in enumerate(X):
+            distances = [*map(lambda x: euclidean_distance(r, x), self.features)]
+            nearest = np.argsort(distances)
+            nearest = self.classes[nearest[:self.k]]
+            y_pred[i] = mode(nearest)
+        return y_pred

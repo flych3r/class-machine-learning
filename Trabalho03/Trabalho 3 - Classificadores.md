@@ -20,6 +20,6 @@ Dado
 
 Relatório
 
-  1. Reporte o que se pede usando os métodos KNN (com k=1,2 e3) e MLP (como número de neurônios na camada oculta 2,3 e 4):
+  1. Reporte o que se pede usando os métodos KNN (com k=1,2 e 3) e MLP (como número de neurônios na camada oculta 2, 3 e 4):
         * a. O erro do 5-fold
         * b. O dado em um gráfico de dispersão com as fronteiras de separação produzidas pelo método treinado com o conjunto de dados inteiro
