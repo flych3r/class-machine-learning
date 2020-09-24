@@ -317,7 +317,7 @@ class MLP:
     def _sigmoid(self, y):
         return 1 / (1 + np.exp(-y))
 
-    def _sigmoid_line(self, y):
+    def _sigmoid_derivative(self, y):
         return self._sigmoid(y) * (1 - self._sigmoid(y))
 
     def _get_classess(y_pred):
@@ -336,11 +336,11 @@ class MLP:
             o_A = self._sigmoid(o)
 
             grad_o_A = - (np.divide(y, o_A) - np.divide(1 - y, 1 - o_A))
-            grad_o = grad_o_A * self._sigmoid_line(o)
+            grad_o = grad_o_A * self._sigmoid_derivative(o)
             grad_O = h_A.T @ grad_o
 
             grad_h_A = grad_o_A @ self.O.T
-            grad_h = grad_h_A * self._sigmoid_line(h)
+            grad_h = grad_h_A * self._sigmoid_derivative(h)
             grad_H = X.T @ grad_h
 
             self.H -= grad_H * learning_rate
