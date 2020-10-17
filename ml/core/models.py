@@ -377,3 +377,69 @@ class KNN:
             nearest = self.classes[nearest[:self.k]]
             y_pred[i] = mode(nearest)
         return y_pred
+
+class KMeans():
+    def __init__(self, n_clusters=8, max_iter=300, tool=0.0001):
+        self.n_clusters = n_clusters
+        self.max_iter = max_iter
+        self.tool = tool
+        self.cluster_centers_ = None
+        self.inertia_ = None
+        self.labels_ = None
+
+    def fit(self, X):
+        self.cluster_centers_ = self._calculate_initial_centers(X)
+        self.labels_ = self._all_nearest_centroids(X)
+        old_inertia = self._inertia(X)
+
+        for _ in range(self.max_iter):
+            self.cluster_centers_ = self._update_centroids(X)
+            self.labels_ = self._all_nearest_centroids(X)
+            self.inertia_ = self._inertia(X)
+            if np.abs(old_inertia - self.inertia_) < self.tool:
+                break
+            old_inertia = self.inertia_
+        return self
+
+    def predict(self, X):
+        return self._all_nearest_centroids(X)
+
+    def _calculate_initial_centers(self, dataset):
+        return np.random.uniform(
+            dataset.min(axis=0),
+            dataset.max(axis=0),
+            (self.n_clusters, dataset.shape[1])
+        )
+
+    def _nearest_centroid(self, a):
+        distances = np.zeros(self.cluster_centers_.shape[0])
+
+        for i, centroid in enumerate(self.cluster_centers_):
+            distances[i] = euclidean_distance(a, centroid)
+
+        return np.argmin(distances)
+
+    def _all_nearest_centroids(self, dataset):
+        nearest_indexes = np.zeros(dataset.shape[0])
+
+        for i, a in enumerate(dataset):
+            nearest_indexes[i] = self._nearest_centroid(a)
+
+        return nearest_indexes
+
+
+    def _inertia(self, dataset):
+        inertia = 0
+        for i, centroid in enumerate(self.cluster_centers_):
+            dataframe = dataset[self.labels_ == i, :]
+            for a in dataframe:
+                inertia += np.square(euclidean_distance(a, centroid))
+
+        return inertia
+
+    def _update_centroids(self, dataset):
+        for i, centroid in enumerate(self.cluster_centers_):
+            dataframe = dataset[self.labels_ == i, :]
+            if dataframe.shape[0] != 0:
+                self.cluster_centers_[i] = np.mean(dataframe, axis=0)
+        return self.cluster_centers_

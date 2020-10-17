@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from IPython import display
 from ml.core.metrics import confusion_matrix
+from ml.core.models import KMeans
 
 
 def config_plot():
@@ -90,6 +91,21 @@ def plot_boundaries(X, y, clf):
     plt.xticks(())
     plt.yticks(())
     plt.grid(False)
+
+
+def elbow_method(dataset, k):
+    inertias = np.zeros(k)
+    ks = np.arange(1, k + 1)
+
+    for i, k in enumerate(ks):
+        inertias[i] = KMeans(n_clusters=k).fit(dataset).inertia_
+
+    plt.plot(ks, inertias)
+    plt.xticks(ks)
+    plt.xlabel('k value')
+    plt.ylabel('Inertia value')
+    plt.title('Elbow Method')
+    plt.show()
 
 
 class Animator:

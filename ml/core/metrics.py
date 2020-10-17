@@ -1,6 +1,7 @@
 import numpy as np
 from ml.core.losses import rss
 
+
 def mse(y_true, y_pred):
     y_true = y_true.reshape(y_pred.shape)
     return np.mean(np.square(y_true - y_pred))

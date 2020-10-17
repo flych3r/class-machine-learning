@@ -1,4 +1,5 @@
 from .core import data
+from .core import decomposition
 from .core import losses
 from .core import math
 from .core import metrics
